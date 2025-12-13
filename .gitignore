@@ -13,3 +13,6 @@ env/
 
 # Jupyter notebook chekpoints
 .ipynb_checkpoints
+
+# Ignore large CSVs
+data/*.csv
