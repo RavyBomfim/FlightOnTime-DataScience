@@ -4,7 +4,7 @@
 
 1. Remover chave "distancia_km" e adicionar "código tipo linha" (nomenclatura a definir)
 
-## -> Modelo
+## -> ETL
 
 1. Remover NaN da variável "Código Tipo Linha" 
 
@@ -17,17 +17,19 @@
 
 3. Dropar "Partida Prevista" e "Partida Real"
 
-4. Separar treino e teste (70/30)
+## -> Modelo
 
-5. Verificar balanceamento:
+1. Separar treino e teste (70/30)
+
+2. Verificar balanceamento:
     - Se necessário fazer resampling (smote ?)
 
-6. Fazer validação cruzada (k-fold / stratified k-fold)
+3. Fazer validação cruzada (k-fold / stratified k-fold)
 
-7. Testar modelos (random forest, decision tree, logistic regression, KNN etc.) e hiperparâmetros (Oracle AutoML / Biblioteca Advanced Data Science - ADS)
+4. Testar modelos (random forest, decision tree, logistic regression, KNN etc.) e hiperparâmetros (Oracle AutoML / Biblioteca Advanced Data Science - ADS)
 
-8. Avaliação...
+5. Avaliação...
 
-8. Resolver se deve mensurar ``recall`` ou ``precisão``
+6. Resolver se deve mensurar ``recall`` ou ``precisão``
 
 É melhor achar (modelo prevê) que vai atrasar (1) e não atrasar (fato) (0)
