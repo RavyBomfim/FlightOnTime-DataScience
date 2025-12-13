@@ -7,6 +7,9 @@
 __pycache__/
 **/__pycache__/
 
-# Optional: Ignore virtual environment folders
+# Ignore virtual environment folders
 venv/
 env/
+
+# Jupyter notebook chekpoints
+.ipynb_checkpoints
