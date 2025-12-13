@@ -208,7 +208,7 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
 
     print(f"\n🏁 Finalizado.\n")
     print(f"Total de linhas carregadas: {master_df.shape[0]}")
-    print(f"Memória total usada: {master_df.memory_usage(deep=True).sum() / (1024 ** 2):.2f} MB\n")
+    print(f"Memória usada no Dataframe Master): {master_df.memory_usage(deep=True).sum() / (1024 ** 2):.2f} MB\n")
 
     return master_df
 
@@ -243,10 +243,12 @@ def save_df(df: pd.DataFrame, filename: str = "vra_master", timestamp: bool = Fa
     os.makedirs(data_dir, exist_ok=True)
 
     # Se timestamp=True, adiciona YYYYMMDD_HHMMSS ao nome do arquivo
+    filename_raw = filename
     if timestamp:
         base, ext = os.path.splitext(filename)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{base}_{ts}{ext}"
+        filename_raw = f"{base}_{ts}"
 
     # Caminho completo para salvar o arquivo
     filepath = os.path.join(data_dir, filename)
@@ -256,8 +258,8 @@ def save_df(df: pd.DataFrame, filename: str = "vra_master", timestamp: bool = Fa
     df.to_parquet(f'{filepath}.parquet', index=False)
 
     print(f"📁 Arquivo salvo com sucesso:")
-    print(f"   → ./data/{filename}.csv")
-    print(f"   → ./data/{filename}.parquet")
+    print(f"   → ./data/{filename_raw}.csv")
+    print(f"   → ./data/{filename_raw}.parquet")
 
 def main() -> None:
     '''

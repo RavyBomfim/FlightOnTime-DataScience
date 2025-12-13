@@ -60,7 +60,7 @@ Para cada arquivo CSV, esta função:
 4. **Remove** linhas com datas ausentes.  
 5. **Converte** datas para datetime.  
 6. **Converte** colunas categóricas para category (otimiza memória em 70–90%).  
-7. **Concatena** incrementalmente no DataFrame mestre.  
+7. **Concatena** no DataFrame mestre.  
 8. **Exibe** progresso, contagem de linhas e uso de memória.
 
 **Retorno:**  
