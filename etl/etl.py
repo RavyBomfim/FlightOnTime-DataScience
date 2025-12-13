@@ -208,7 +208,7 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
 
     print(f"\n🏁 Finalizado.\n")
     print(f"Total de linhas carregadas: {master_df.shape[0]}")
-    print(f"Memória usada no Dataframe Master): {master_df.memory_usage(deep=True).sum() / (1024 ** 2):.2f} MB\n")
+    print(f"Memória usada no Dataframe Master: {master_df.memory_usage(deep=True).sum() / (1024 ** 2):.2f} MB\n")
 
     return master_df
 
@@ -257,7 +257,7 @@ def save_df(df: pd.DataFrame, filename: str = "vra_master", timestamp: bool = Fa
     df.to_csv(f'{filepath}.csv', index=False, encoding="utf-8")
     df.to_parquet(f'{filepath}.parquet', index=False)
 
-    print(f"📁 Arquivo salvo com sucesso:")
+    print(f"📁 Arquivos salvos com sucesso:")
     print(f"   → ./data/{filename_raw}.csv")
     print(f"   → ./data/{filename_raw}.parquet")
 
