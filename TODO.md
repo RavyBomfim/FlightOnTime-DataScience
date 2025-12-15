@@ -33,3 +33,4 @@
 6. Resolver se deve mensurar ``recall`` ou ``precisão``
 
 É melhor achar (modelo prevê) que vai atrasar (1) e não atrasar (fato) (0)
+
