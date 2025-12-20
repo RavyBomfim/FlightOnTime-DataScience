@@ -9,3 +9,4 @@ jupyter
 ipykernel
 matplotlib
 seaborn
+oracle-automlx[classic]
