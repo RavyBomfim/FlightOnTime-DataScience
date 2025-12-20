@@ -7,3 +7,5 @@ uvicorn[standard]
 pydantic
 jupyter
 ipykernel
+matplotlib
+seaborn
