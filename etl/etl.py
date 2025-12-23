@@ -137,7 +137,7 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
         "Aeródromo Destino",
         "Partida Prevista",
         "Partida Real",
-    ]
+    ] 
 
     # Colunas do CSV original disponibilizado pela ANAC
     raw_columns = [
