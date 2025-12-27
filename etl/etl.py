@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from datetime import datetime
+from utils.utils import parse_categoricals, parse_datetime
 
 def getUrls() -> list:
     """
@@ -97,41 +98,38 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
         # Remove voos cancelados
         df = df[df["Situação Voo"] == "REALIZADO"]
 
+        # Mantém apenas os voos regulares
+        df = df[df["Código Autorização (DI)"] == "0"]
+
+        # Filtra os tipos de linhas de voo
+        df = df[df["Código Tipo Linha"].isin(["N", "R", "H"])]
+
         # Remove NaN das colunas "Partida Prevista" e "Partida Real"
-        df = df.dropna(subset=["Partida Prevista", "Partida Real"])
+        df = df.dropna(subset=["Partida Prevista", "Partida Real", "Código Tipo Linha"])
 
         # Mantém apenas as colunas desejadas
         df = df[columns]
 
         return df
     
-    # Função interna para converter colunas categóricas
-    def parse_categoricals(df: pd.DataFrame) -> pd.DataFrame:
-        categorical_columns = [
-            "Empresa Aérea",
-            "Código Tipo Linha",
-            "Aeródromo Origem",
-            "Aeródromo Destino",
-        ]
-        for col in categorical_columns:
-            df[col] = df[col].astype('category')
-        
-        return df
-    
-    # Função interna para converter colunas de data/hora
-    def parse_datetime(df: pd.DataFrame) -> pd.DataFrame:
-        datetime_columns = [
-            "Partida Prevista",
-            "Partida Real",
-        ]
-        for col in datetime_columns:
-            df[col] = pd.to_datetime(df[col], format="mixed", dayfirst=True, errors='coerce')
-        
+    # Função interna para configurar colunas de tempo
+    def parse_time_columns(df: pd.DataFrame) -> pd.DataFrame:
+        # Cria a coluna "Atrasado" com valores 0 e 1
+        # 1 = Atrasado, 0 = No Horario
+        df["Atrasado"] = (df["Partida Real"] > df["Partida Prevista"]).astype('int8')
+
+        # Renomeia a coluna "Partida Prevista" para "Data Hora Voo"
+        df = df.rename(columns={"Partida Prevista": "Data Hora Voo"})
+
+        # Remove a coluna "Partida Real"
+        df = df.drop(columns=["Código Autorização (DI)", "Partida Real"])
+
         return df
     
     # Colunas finais desejadas
     columns = [
         "Empresa Aérea",
+        "Código Autorização (DI)",
         "Código Tipo Linha",
         "Aeródromo Origem",
         "Aeródromo Destino",
@@ -191,6 +189,7 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
 
         # Limpeza e parseamento
         df = clean_df(df, columns)
+        df = parse_time_columns(df)
         df = parse_categoricals(df)
         df = parse_datetime(df)
 
@@ -213,7 +212,7 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
     return master_df
 
 
-def save_df(df: pd.DataFrame, filename: str = "vra_master", timestamp: bool = False) -> None:
+def save_df(df: pd.DataFrame, filename: str = "dados_voos", timestamp: bool = False, save_csv: bool = False) -> None:
     """
     Salva o DataFrame em formatos CSV e Parquet dentro do diretório root/data/.
 
@@ -254,11 +253,13 @@ def save_df(df: pd.DataFrame, filename: str = "vra_master", timestamp: bool = Fa
     filepath = os.path.join(data_dir, filename)
 
     # Salva o DataFrame em CSV
-    df.to_csv(f'{filepath}.csv', index=False, encoding="utf-8")
-    df.to_parquet(f'{filepath}.parquet', index=False)
-
-    print(f"📁 Arquivos salvos com sucesso:")
-    print(f"   → ./data/{filename_raw}.csv")
+    if save_csv:
+        df.to_csv(f'{filepath}.csv', index=False, encoding="utf-8")
+        print(f"   → ./data/{filename_raw}.csv")
+    
+    # Salva o DataFrame em parquet
+    print(f"📁 Arquivo salvo com sucesso:")
+    df.to_parquet(f'{filepath}.parquet', engine="fastparquet", index=False)
     print(f"   → ./data/{filename_raw}.parquet")
 
 def main() -> None:

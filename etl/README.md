@@ -133,6 +133,6 @@ E o console exibirá mensagens como:
 
 ## Observações
 
-- A execução completa pode levar tempo devido ao grande volume de arquivos (26 anos × 12 meses).
+- A execução completa pode levar tempo devido ao grande volume de arquivos (25 anos × 12 meses + 1 ano × 10 meses).
 - O uso de `category` e Parquet reduz drasticamente o consumo de memória.
 - Os CSVs originais podem conter milhões de registros; recomenda-se ter espaço suficiente em disco.
