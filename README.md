@@ -56,6 +56,6 @@ O projeto utiliza um conjunto de dados contendo informações reais de voos, inc
 - data e horário de partida  
 - status de atraso  
 
-_Obs: A distância foi obtida em quilômetros a partir da latitude e longitude dos aeródromos de origem e destino, utilizando a fórmula de Haversine, e depois convertida para metros._
+_Obs: A distância foi obtida em quilômetros a partir da latitude e longitude dos aeródromos de origem e destino, utilizando a fórmula haversine, e depois foi convertida para metros._
 
 As funções de ETL foram desenvolvidas para garantir limpeza, consistência e rastreabilidade.
