@@ -183,8 +183,8 @@ def preprocess_csvs(urls: list) -> pd.DataFrame:
         )
 
         # Insere a coluna "Distância (km)" logo após a coluna "Aeródromo Destino"
-        pos = df.columns.get_loc("Aeródromo Destino") + 1
-        df.insert(pos, "Distância (m)", distances)
+        pos = df.columns.get_loc("Aeródromo Destino") + 1 # type: ignore
+        df.insert(pos, "Distância (m)", distances) # type: ignore
 
         df = df.drop(columns=["lat_origem", "lon_origem", "lat_destino", "lon_destino"])
 
