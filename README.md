@@ -49,9 +49,13 @@ Retornando:
 O projeto utiliza um conjunto de dados contendo informações reais de voos, incluindo:
 
 - companhia aérea  
-- aeroporto de origem e destino  
+- código de autorização
+- código do tipo de linha
+- aeroporto/aeródromo de origem e destino 
+- distância do trecho em metros 
 - data e horário de partida  
-- distância do trecho  
 - status de atraso  
+
+_Obs: A distância foi obtida em quilômetros a partir da latitude e longitude dos aeródromos de origem e destino, utilizando a fórmula de Haversine, e depois convertida para metros._
 
 As funções de ETL foram desenvolvidas para garantir limpeza, consistência e rastreabilidade.

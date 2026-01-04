@@ -16,4 +16,3 @@ env/
 
 # Ignore large CSVs
 data/*.csv
-!data/aerodromos.csv

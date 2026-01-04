@@ -21,3 +21,7 @@ def parse_datetime(df: pd.DataFrame) -> pd.DataFrame:
         df[col] = pd.to_datetime(df[col], format="mixed", dayfirst=True, errors='coerce')
     
     return df
+
+def parse_int(df: pd.DataFrame) -> pd.DataFrame:
+    df['Distância (m)'] = df['Distância (m)'].astype('int32')
+    return df
