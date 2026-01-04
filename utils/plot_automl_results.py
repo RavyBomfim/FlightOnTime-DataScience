@@ -7,19 +7,20 @@ import matplotlib.pyplot as plt
 
 def plot_algorithm_selection(estimator: automlx._interface.classifier.AutoClassifier) -> None: # type: ignore
     '''
-        Cada experimento (`trial`) é uma linha em um dataframe que contém:  
+        Exibe um gráfico de barras comparando o desempenho dos algoritmos testados
+        na etapa de seleção de modelo.  
+
+        - Cada experimento (`trial`) é uma linha em um dataframe que contém:  
         Algoritmo, Número de Amostras, Número de Features, Hiperparâmetros, Score, Tempo de Execução, Uso de Memória e Etapa
 
         Parâmetros
         ----------
         estimator : automlx._interface.classifier.AutoClassifier
-            Estimador treinado pelo Oracle AutoMLx, contendo o resumo dos experimentos e o modelo selecionado.
+            - Estimador treinado pelo Oracle AutoMLx, contendo o resumo dos experimentos e o modelo selecionado.
 
         Retorno
         -------
         None
-            Exibe um gráfico de barras comparando o desempenho dos algoritmos testados
-            na etapa de seleção de modelo.
     '''
     trials = estimator.completed_trials_summary_[estimator.completed_trials_summary_["Step"].str.contains('Model Selection')]
     name_of_score_column = f"Score ({estimator._inferred_score_metric[0].name})"
@@ -52,19 +53,20 @@ def plot_algorithm_selection(estimator: automlx._interface.classifier.AutoClassi
 
 def plot_adaptive_sampling(estimator: automlx._interface.classifier.AutoClassifier) -> None: # type: ignore
     '''
-        Cada experimento (`trial`) é uma linha em um dataframe que contém:  
+        Exibe um gráfico de linha relacionando o tamanho da amostra do dataset
+        com o score obtido em cada experimento.  
+
+        - Cada experimento (`trial`) é uma linha em um dataframe que contém:  
         Algoritmo, Número de Amostras, Número de Features, Hiperparâmetros, Score, Tempo de Execução, Uso de Memória e Etapa
 
         Parâmetros
         ----------
         estimator : automlx._interface.classifier.AutoClassifier
-            Estimador treinado pelo Oracle AutoMLx, contendo os resultados da etapa de amostragem adaptativa.
+            - Estimador treinado pelo Oracle AutoMLx, contendo os resultados da etapa de amostragem adaptativa.
 
         Retorno
         -------
         None
-            Exibe um gráfico de linha relacionando o tamanho da amostra do dataset
-            com o score obtido em cada experimento.
     '''
     trials = estimator.completed_trials_summary_[estimator.completed_trials_summary_["Step"].str.contains('Adaptive Sampling')]
     name_of_score_column = f"Score ({estimator._inferred_score_metric[0].name})"
@@ -88,21 +90,22 @@ def plot_adaptive_sampling(estimator: automlx._interface.classifier.AutoClassifi
 
 def plot_feature_selection(estimator: automlx._interface.classifier.AutoClassifier, df: pd.DataFrame) -> None: # type: ignore
     '''
-        Cada experimento (`trial`) é uma linha em um dataframe que contém:  
+        Exibe no console as features selecionadas e descartadas e apresenta
+        um gráfico do score em função do número de features testadas.  
+
+        - Cada experimento (`trial`) é uma linha em um dataframe que contém:  
         Algoritmo, Número de Amostras, Número de Features, Hiperparâmetros, Score, Tempo de Execução, Uso de Memória e Etapa
 
         Parâmetros
         ----------
         estimator : automlx._interface.classifier.AutoClassifier
-            Estimador treinado pelo Oracle AutoMLx, contendo informações sobre as features selecionadas.
+            - Estimador treinado pelo Oracle AutoMLx, contendo informações sobre as features selecionadas.
         df : pandas.DataFrame
-            DataFrame original utilizado no treinamento, contendo todas as features.
+            - DataFrame original utilizado no treinamento, contendo todas as features.
 
         Retorno
         -------
         None
-            Exibe no console as features selecionadas e descartadas e apresenta
-            um gráfico do score em função do número de features testadas.
     '''
     # Exibe as features selecionadas e as descartadas
     print(f"Features selected: {estimator.selected_features_names_}")
@@ -132,20 +135,20 @@ def plot_feature_selection(estimator: automlx._interface.classifier.AutoClassifi
 
 def plot_model_tuning(estimator: automlx._interface.classifier.AutoClassifier) -> None: # type: ignore
     '''
-        Cada experimento (`trial`) é uma linha em um dataframe que contém:  
+        Exibe um gráfico mostrando a evolução do melhor score ao longo das
+        iterações de tuning de hiperparâmetros.  
+        
+        - Cada experimento (`trial`) é uma linha em um dataframe que contém:  
         Algoritmo, Número de Amostras, Número de Features, Hiperparâmetros, Score, Tempo de Execução, Uso de Memória e Etapa
 
         Parâmetros
         ----------
         estimator : automlx._interface.classifier.AutoClassifier
-            Estimador treinado pelo Oracle AutoMLx, contendo os resultados da etapa
-            de ajuste de hiperparâmetros.
+            - Estimador treinado pelo Oracle AutoMLx, contendo os resultados da etapa de ajuste de hiperparâmetros.
 
         Retorno
         -------
         None
-            Exibe um gráfico mostrando a evolução do melhor score ao longo das
-            iterações de tuning de hiperparâmetros.
     '''
     trials = estimator.completed_trials_summary_[estimator.completed_trials_summary_["Step"].str.contains('Model Tuning')]
     name_of_score_column = f"Score ({estimator._inferred_score_metric[0].name})"
