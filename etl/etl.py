@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from utils.utils import parse_categoricals, parse_datetime, parse_int
+from utils.parsers import parse_categoricals, parse_datetime, parse_int
 
 aerodromos = pd.read_csv("metadata/aerodromos.csv")
 
