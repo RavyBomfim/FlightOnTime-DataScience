@@ -1,344 +1,70 @@
 import os
 import pandas as pd
-import numpy as np
-from datetime import datetime
-from utils.parsers import parse_categoricals, parse_datetime, parse_int
 
-aerodromos = pd.read_csv("metadata/aerodromos.csv")
+from etl.save_df import save_df
+from etl.get_urls import get_urls
+from etl.preprocess_csvs import preprocess_csvs
 
-def getUrls() -> list:
+from helpers.parsers import parse_categoricals, parse_datetime, parse_int
+
+
+def processar_dados(save: bool = True) -> pd.DataFrame:
     """
-    Gera a lista completa de URLs dos arquivos CSV do conjunto 
-    “Voo Regular Ativo (VRA)” disponibilizado pela ANAC.
+    Executa o pipeline completo de ETL dos dados de voos a partir da base de dados de vôos da ANAC (Agência Nacional de Aviação Civil).
 
-    A função constrói dinamicamente os caminhos de acesso aos arquivos 
-    organizados por ano e mês, conforme a estrutura oficial do portal de 
-    dados abertos da ANAC. São consideradas todas as combinações entre os anos 
-    de 2000 a 2025 e os 12 meses do ano, com exceção dos meses posteriores a 
-    outubro de 2025, pois esses arquivos ainda não estão disponíveis.
-
-    Para cada combinação válida, é gerada a URL correspondente no formato:
-        https://.../ANO/MM - Mês/VRA_ANOMM.csv
-
-    Retorna uma lista contendo todas as URLs resultantes, na ordem cronológica.
-
-    Retorno
-    -------
-    list
-        Lista de strings contendo as URLs completas dos arquivos CSV do VRA.
-    """
-
-    url_base = "https://sistemas.anac.gov.br/dadosabertos/Voos%20e%20opera%C3%A7%C3%B5es%20a%C3%A9reas/Voo%20Regular%20Ativo%20%28VRA%29"
-    anos = list(range(2018, 2026))
-    meses = {
-        1:  "01%20-%20Janeiro",
-        2:  "02%20-%20Fevereiro",
-        3:  "03%20-%20Mar%C3%A7o",
-        4:  "04%20-%20Abril",
-        5:  "05%20-%20Maio",
-        6:  "06%20-%20Junho",
-        7:  "07%20-%20Julho",
-        8:  "08%20-%20Agosto",
-        9:  "09%20-%20Setembro",
-        10: "10%20-%20Outubro",
-        11: "11%20-%20Novembro",
-        12: "12%20-%20Dezembro"
-    }
-
-    urls = []
-
-    for ano in anos:
-        for mes in meses.items():
-            if ano == 2025 and mes[0] > 10:
-                continue
-            url = f"{url_base}/{ano}/{mes[1]}/VRA_{ano}{mes[0]}.csv"
-            urls.append(url)
-    
-    return urls
-
-
-def preprocess_csvs(urls: list) -> pd.DataFrame:
-    """
-    Carrega, filtra e preprocessa múltiplos arquivos CSV do VRA (Voo Regular Ativo) 
-    disponibilizados pela ANAC, retornando um único DataFrame consolidado.
-
-    Este procedimento realiza o download sequencial dos arquivos, aplica regras de ETL 
-    para limpeza e normalização dos dados e concatena os resultados em um DataFrame único. 
-    Ao final, os dados retornados contêm apenas informações relevantes para análise de 
-    voos realizados, com colunas categóricas otimizadas e datas convertidas para datetime.
-
-    Etapas executadas para cada arquivo CSV:
-        1. Download e leitura do arquivo bruto, ignorando as duas primeiras linhas 
-           (“Atualizado em” e o cabeçalho original).
-        2. Seleção das colunas necessárias conforme o layout oficial da ANAC.
-        3. Remoção de linhas cuja situação do voo seja "CANCELADO".
-        4. Remoção de registros com valores ausentes nas colunas de data/hora.
-        5. Conversão das colunas de data para o tipo datetime.
-        6. Conversão de colunas categóricas para o tipo category (otimização de memória).
-        7. Concatenação incremental no DataFrame mestre.
+    Baixa os arquivos CSV brutos, realiza o pré-processamento, consolida os dados
+    em um único DataFrame e salva automaticamente os resultados em formatos
+    CSV e Parquet no diretório ./data/, com versionamento por timestamp.
 
     Parâmetros
     ----------
-    urls : list
-        Lista contendo as URLs dos arquivos CSV a serem processados.
+    **save** : bool, opcional
+        Indica se o DataFrame resultante deve ser salvo em disco.
+        Padrão é True, o que significa que os arquivos serão salvos
+        automaticamente.
 
-    Retorno
+    Retorna
     -------
-    pandas.DataFrame
-        DataFrame consolidado contendo apenas voos realizados e colunas previamente 
-        definidas, com tipagem otimizada e datas convertidas.
-
-    Observações
-    -----------
-    - A função imprime estatísticas de progresso, quantidade de linhas carregadas 
-      e uso de memória ao longo do processo.
+    pd.DataFrame
+        Dataset consolidado e pré-processado.
     """
+    urls = get_urls()
+    aerodromos = pd.read_csv("metadata/aerodromos.csv")
 
-    print(f"Iniciando o download e preprocessamento de {len(urls)} arquivos CSV...\n")
+    dataset = preprocess_csvs(urls, aerodromos)
+    if save:
+      save_df(dataset, timestamp=True)
 
-    # Função interna para limpeza do DataFrame
-    def clean_df(df: pd.DataFrame, columns: list) -> pd.DataFrame:
-        # Remove voos cancelados
-        df = df[df["Situação Voo"] == "REALIZADO"]
-
-        # Remove os voos cujos "Aeródromo Origem" ou "Aeródromo Destino" não estejam na lista de aeródromos da ANAC 
-        df = df[df["Aeródromo Origem"].isin(aerodromos["Código OACI"])]
-        df = df[df["Aeródromo Destino"].isin(aerodromos["Código OACI"])]
-
-        # Mantém apenas os voos regulares
-        df = df[df["Código Autorização (DI)"] == "0"]
-
-        # Filtra os tipos de linhas de voo
-        df = df[df["Código Tipo Linha"].isin(["N", "R", "H"])]
+    return dataset   
 
 
-        # Remove NaN das colunas "Partida Prevista" e "Partida Real"
-        df = df.dropna(subset=["Partida Prevista", "Partida Real", "Código Tipo Linha"])
-
-        # Mantém apenas as colunas desejadas
-        df = df[columns]
-
-        return df
-    
-    # Função interna para configurar colunas de tempo
-    def parse_time_columns(df: pd.DataFrame) -> pd.DataFrame:
-        # Cria a coluna "Atrasado" com valores 0 e 1
-        # 1 = Atrasado, 0 = No Horario
-        df["Atrasado"] = (df["Partida Real"] > df["Partida Prevista"]).astype('int8')
-
-        # Renomeia a coluna "Partida Prevista" para "Data Hora Voo"
-        df = df.rename(columns={"Partida Prevista": "Data Hora Voo"})
-
-        # Remove a coluna "Partida Real"
-        df = df.drop(columns=["Código Autorização (DI)", "Partida Real"])
-
-        return df
-    
-    # Função interna para adicionar a latitude e longitude dos aeroportos de origem e destino
-    def merge_aerodromos(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
-        global aerodromos
-        df = df.merge(
-            aerodromos,
-            left_on=f"Aeródromo {tipo.capitalize()}",
-            right_on="Código OACI", 
-            how='left'
-        ).rename(columns={"Latitude": f"lat_{tipo}", "Longitude": f"lon_{tipo}"}).drop(columns="Código OACI")
-
-        return df
-
-    # Função interna para calcular a distância entre dois aeroportos
-    def haversine(lat1, lon1, lat2, lon2):
-        R = 6371 # raio da terra em km
-
-        # Converte as latitudes e longitudes de graus para radianos
-        lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
-
-        # Diferença entre as latitudes dos dois pontos
-        dlat = lat2 - lat1
-
-        # Diferença entre as longitudes dos dois pontos
-        dlon = lon2 - lon1
-
-        # Obtém o valor intermediário que representa a separação angular entre os dois pontos
-        a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
-
-        # Obtém o ângulo central entre os dois pontos na superfície da Terra
-        c = 2 * np.arcsin(np.sqrt(a))
-
-        # Arrendonda o resultado do cáculo em km e converte para metros
-        distance = (round(R * c, 0) * 1000)
-
-        return distance
-    
-    # Função interna para criação da coluna "Distância (km)"
-    def create_distance_col(df: pd.DataFrame) -> pd.DataFrame:
-        df = merge_aerodromos(df, "origem")
-        df = merge_aerodromos(df, "destino")
-
-        distances = haversine(
-            df["lat_origem"],
-            df["lon_origem"],
-            df["lat_destino"],
-            df["lon_destino"]
-        )
-
-        # Insere a coluna "Distância (km)" logo após a coluna "Aeródromo Destino"
-        pos = df.columns.get_loc("Aeródromo Destino") + 1 # type: ignore
-        df.insert(pos, "Distância (m)", distances) # type: ignore
-
-        df = df.drop(columns=["lat_origem", "lon_origem", "lat_destino", "lon_destino"])
-
-        return df
-
-
-    # Colunas finais desejadas
-    columns = [
-        "Empresa Aérea",
-        "Código Autorização (DI)",
-        "Código Tipo Linha",
-        "Aeródromo Origem",
-        "Aeródromo Destino",
-        "Partida Prevista",
-        "Partida Real",
-    ] 
-
-    # Colunas do CSV original disponibilizado pela ANAC
-    raw_columns = [
-        "Empresa Aérea",
-        "Número Voo",
-        "Código Autorização (DI)",
-        "Código Tipo Linha",
-        "Aeródromo Origem",
-        "Aeródromo Destino",
-        "Partida Prevista",
-        "Partida Real",
-        "Chegada Prevista",
-        "Chegada Real",
-        "Situação Voo",
-        "Código Justificativa"
-    ]
-
-    # Inicializa o DataFrame mestre apenas com as colunas desejadas
-    master_df = pd.DataFrame(columns=columns)
-
-    # Inicializa lista para armazenar DataFrames individuais
-    dfs = []
-
-    # Variáveis de controle
-    lines = 0
-    memory_usage = 0
-
-    for i, url in enumerate(urls, start=1):
-
-        print(f"[{i}/{len(urls)}] Carregando: {url.replace('https://sistemas.anac.gov.br/dadosabertos/Voos%20e%20opera%C3%A7%C3%B5es%20a%C3%A9reas/Voo%20Regular%20Ativo%20%28VRA%29', 'http://...')}")
-
-        try:
-            # Leitura do CSV bruto
-            df = pd.read_csv(
-                url,
-                sep=';',
-                quotechar='"',
-                skiprows=2,         # pula "Atualizado em" + header
-                header=None,
-                names=raw_columns,
-                low_memory=False
-            )
-
-        except Exception as e:
-            print(f"❌ Falha ao ler {url}\nErro: {e}")
-            continue
-
-        if df.empty:
-            print(f"⚠️ CSV vazio em {url}, ignorando.")
-            continue
-
-        # Limpeza e parseamento
-        df = clean_df(df, columns)
-        df = create_distance_col(df)
-        df = parse_time_columns(df)
-        df = parse_categoricals(df)
-        df = parse_datetime(df)
-        df = parse_int(df)
-
-        # Adiciona o df limpo à lista
-        dfs.append(df)
-
-        lines += df.shape[0]
-        memory_usage += df.memory_usage(deep=True).sum() / (1024 ** 2)
-        print(f"✔ {df.shape[0]} linhas carregadas.")
-        print(f"   Total atual de linhas: {lines}")
-        print(f"   Memória usada: {memory_usage:.2f} MB\n")
-
-    # Concatena todos os dfs ao DataFrame mestre
-    master_df = pd.concat(dfs, ignore_index=True)
-
-    print(f"\n🏁 Finalizado.\n")
-    print(f"Total de linhas carregadas: {master_df.shape[0]}")
-    print(f"Memória usada no Dataframe Master: {master_df.memory_usage(deep=True).sum() / (1024 ** 2):.2f} MB\n")
-
-    return master_df
-
-
-def save_df(df: pd.DataFrame, filename: str = "dados_voos", timestamp: bool = False, save_csv: bool = False) -> None:
+def carregar_dados(filename: str) -> pd.DataFrame:
     """
-    Salva o DataFrame em formatos CSV e Parquet dentro do diretório root/data/.
+    Carrega um dataset de voos previamente pré-processado a partir de um arquivo Parquet
+    e aplica conversões de tipo para colunas categóricas e de data/hora.
 
     Parâmetros
     ----------
-    df : pd.DataFrame
-        DataFrame que será salvo.
-    filename : str, opcional
-        Nome base do arquivo (sem extensão). O padrão é "vra_master".
-    timestamp : bool, opcional
-        Se True, adiciona ao nome do arquivo um sufixo com data e hora
-        no formato YYYYMMDD_HHMMSS, garantindo unicidade e versionamento.
+    filename : str
+        Nome-base do arquivo Parquet localizado em ./data/.
+        Não inclua a extensão ".parquet".
 
-    Notas
-    -----
-    - O diretório root/data/ é criado automaticamente caso não exista.
-    - Dois arquivos são gerados:
-        • <filename>.csv (codificação UTF-8)  
-        • <filename>.parquet (colunar, compactado)
-    - O Parquet é recomendado para processamento posterior devido à maior velocidade
-      de leitura e economia de memória.
+    Retorna
+    -------
+    pd.DataFrame
+        Dataset carregado com colunas categóricas convertidas para `category`
+        e colunas de data/hora convertidas para `datetime`, pronto para análise
+        ou modelagem.
     """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)
+    filepath = os.path.join(project_root, "data", f"{filename}.parquet")
+    print(f"Carregando dataset local de: ./data/{filename}.parquet")
 
-    # Garante que o diretório ./data/ exista
-    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
-    data_dir = os.path.abspath(data_dir)
-    os.makedirs(data_dir, exist_ok=True)
+    dataset = pd.read_parquet(filepath)
+    dataset = parse_categoricals(dataset)
+    dataset = parse_datetime(dataset)
+    dataset = parse_int(dataset, col="Distância (m)", int_type='int32')
+    print("🏁 Dataset carregado com sucesso!")
 
-    # Se timestamp=True, adiciona YYYYMMDD_HHMMSS ao nome do arquivo
-    filename_raw = filename
-    if timestamp:
-        base, ext = os.path.splitext(filename)
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{base}_{ts}{ext}"
-        filename_raw = f"{base}_{ts}"
-
-    # Caminho completo para salvar o arquivo
-    filepath = os.path.join(data_dir, filename)
-
-    # Salva o DataFrame em CSV
-    if save_csv:
-        df.to_csv(f'{filepath}.csv', index=False, encoding="utf-8")
-        print(f"   → ./data/{filename_raw}.csv")
-    
-    # Salva o DataFrame em parquet
-    print(f"📁 Arquivo salvo com sucesso:")
-    df.to_parquet(f'{filepath}.parquet', engine="fastparquet", index=False)
-    print(f"   → ./data/{filename_raw}.parquet")
-
-def main() -> None:
-    '''
-    Função principal para executar o processo ETL completo direto da linha de comando.
-    '''
-    urls = getUrls()
-    master_dataframe = preprocess_csvs(urls)
-    save_df(master_dataframe, timestamp=True)
-
-    master_dataframe.info()
-    master_dataframe.head()
-
-if __name__ == "__main__":
-    main()
+    return dataset

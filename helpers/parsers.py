@@ -22,6 +22,6 @@ def parse_datetime(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-def parse_int(df: pd.DataFrame, int_type: str = 'int32') -> pd.DataFrame:
-    df['Distância (m)'] = df['Distância (m)'].astype(int_type) # type: ignore
+def parse_int(df: pd.DataFrame, col: str, int_type: str = 'int32') -> pd.DataFrame:
+    df[col] = df[col].astype(int_type) # type: ignore
     return df

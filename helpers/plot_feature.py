@@ -1,8 +1,8 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils.label_plot import label_plot
-from utils.plot_central_tendency import plot_central_tendency
+from helpers.label_plot import label_plot
+from helpers.plot_central_tendency import plot_central_tendency
 
 def plot_histplot(df: pd.DataFrame, feature: str) -> None:
     plt.figure(figsize=(6, 4))
