@@ -63,7 +63,6 @@ def preprocess_csvs(urls: list, aerodromos: pd.DataFrame) -> pd.DataFrame:
     # Colunas desejadas
     columns = [
         "Empresa Aérea",
-        "Código Tipo Linha",
         "Aeródromo Origem",
         "Aeródromo Destino",
         "Partida Prevista",
