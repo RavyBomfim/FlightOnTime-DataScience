@@ -9,16 +9,16 @@ def save_df(df: pd.DataFrame, filename: str = "dados_voos", timestamp: bool = Fa
     Parâmetros
     ----------
     df : pd.DataFrame
-        DataFrame que será salvo.
+        - DataFrame que será salvo.
     filename : str, opcional
-        Nome base do arquivo (sem extensão). O padrão é "vra_master".
+        - Nome base do arquivo (sem extensão). O padrão é "vra_master".
     timestamp : bool, opcional
-        Se True, adiciona ao nome do arquivo um sufixo com data e hora
+        - Se True, adiciona ao nome do arquivo um sufixo com data e hora
         no formato YYYYMMDD_HHMMSS, garantindo unicidade e versionamento.
 
     Notas
     -----
-    - O diretório root/data/ é criado automaticamente caso não exista.
+    - O diretório ./data/ é criado automaticamente caso não exista.
     - Dois arquivos são gerados:
         • <filename>.csv (codificação UTF-8)  
         • <filename>.parquet (colunar, compactado)
