@@ -4,7 +4,6 @@ import pandas as pd
 def parse_categoricals(df: pd.DataFrame) -> pd.DataFrame:
     categorical_columns = [
         "Empresa Aérea",
-        "Código Tipo Linha",
         "Aeródromo Origem",
         "Aeródromo Destino",
     ]
