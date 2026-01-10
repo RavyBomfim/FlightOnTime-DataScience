@@ -21,18 +21,18 @@ def export_model(estimator: automlx._interface.classifier.AutoClassifier, filena
     -----
     - O diretório ./models/ é criado automaticamente caso não exista.
     '''
+    if '.' in filename:
+        raise ValueError("O nome do arquivo não deve conter extensão.")
+
     # Garante que o diretório ./models/ exista
     models_dir = os.path.join(os.path.dirname(__file__), "..", "models")
     models_dir = os.path.abspath(models_dir)
     os.makedirs(models_dir, exist_ok=True)
 
     # Se timestamp=True, adiciona YYYYMMDD_HHMMSS ao nome do arquivo
-    filename_raw = filename
     if timestamp:
-        base, ext = os.path.splitext(filename)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{base}_{ts}{ext}"
-        filename_raw = f"{base}_{ts}"
+        filename = f"{filename}_{ts}"
 
     # Caminho completo para salvar o arquivo
     filepath = os.path.join(models_dir, filename)
@@ -42,4 +42,4 @@ def export_model(estimator: automlx._interface.classifier.AutoClassifier, filena
         pickle.dump(estimator, file)
 
     print(f"📁 Arquivo salvo com sucesso:")
-    print(f"   → ./models/{filename_raw}.pkl")
+    print(f"   → ./models/{filename}.pkl\n")

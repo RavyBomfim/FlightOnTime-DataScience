@@ -4,7 +4,9 @@ from pydantic import BaseModel
 from API.predict import predict_delay
 
 app = FastAPI()
-model_name = "flight_delay_XGBClassifier_20260108_173529.pkl"
+
+# Nome do modelo treinado a ser utilizado (sem extensão)
+model_name = "flight_delay_XGBClassifier_20260108_173529"
 
 class PredictRequest(BaseModel):
     companhia: str

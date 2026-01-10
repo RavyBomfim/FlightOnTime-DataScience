@@ -51,7 +51,7 @@ def transform_input(
 def predict_delay(model_filename: str, input_data: dict) -> dict:
     models_dir = os.path.join(os.path.dirname(__file__), "..", "models")
     models_dir = os.path.abspath(models_dir)
-    model_path = f'{models_dir}/{model_filename}'
+    model_path = f'{models_dir}/{model_filename}.pkl'
 
     model = pickle.load(open(model_path, 'rb'))
     x = transform_input(input_data, model)
