@@ -11,8 +11,7 @@ Este endpoint permite **prever a pontualidade de voos** com base na companhia a�
 
 A API recebe uma requisição JSON e retorna uma resposta JSON contendo:
 
-
-- **previsao**: status previsto do voo (0 ou 1) 
+- **previsao**: status previsto do voo (`0` para pontual e `1` para atraso) 
 - **probabilidade**: probabilidade da previsão  
 
 O endpoint foi desenvolvido usando **FastAPI** e **Pydantic**, garantindo validação automática do corpo da requisição e estrutura do retorno.
@@ -35,6 +34,14 @@ O arquivo `.env` não é versionado e já está incluído no `.gitignore`.
 
 O valor de `PREDICTION_API_TOKEN` deve ser um token secreto gerado previamente e
 configurado também no backend Java, sendo enviado no header `Authorization` das requisições.
+
+## Geração do token de autenticação
+
+Para gerar um token, o seguinte comando pode ser utilizado:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ## Inicialização
 
@@ -81,7 +88,7 @@ Authorization: Bearer <TOKEN>
 
 ```JSON
 {
-  "previsao": "Pontual",
+  "previsao": 1,
   "probabilidade": 0.22
 }
 ```
