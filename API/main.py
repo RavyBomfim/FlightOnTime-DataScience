@@ -30,9 +30,9 @@ class PredictResponse(BaseModel):
     probabilidade: float
 
 @app.post("/predict", response_model=PredictResponse)
-def predict(data: PredictRequest, Authorization: str = Header(None)):
+def predict(data: PredictRequest, authorization: str = Header(None)):
 
-    if Authorization != API_TOKEN:
+    if authorization != API_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     # Load your trained model and run inference

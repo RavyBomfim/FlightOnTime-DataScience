@@ -98,7 +98,7 @@ import requests
 url = "http://127.0.0.1:8000/predict"
 
 headers = {
-    "Authorization": "Bearer SEU_TOKEN_AQUI"
+    "authorization": "Bearer SEU_TOKEN_AQUI"
 }
 
 data = {
