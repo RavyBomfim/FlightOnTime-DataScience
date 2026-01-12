@@ -5,7 +5,6 @@
 **Método:** `POST`  
 **Content-Type:** `application/json`
 
-
 ## Descrição
 
 Este endpoint permite **prever a pontualidade de voos** com base na companhia aérea, aeroporto de origem, aeroporto de destino, data e hora da partida e distância entre os aeroportos.
@@ -17,12 +16,31 @@ A API recebe uma requisição JSON e retorna uma resposta JSON contendo:
 
 O endpoint foi desenvolvido usando **FastAPI** e **Pydantic**, garantindo validação automática do corpo da requisição e estrutura do retorno.
 
+## Autenticação
+
+Este endpoint é protegido por **token de autenticação**.
+
+O token deve ser enviado **no header da requisição**:
+
+Requisições sem o token ou com token inválido retornarão **HTTP 401 (Unauthorized)**.
+
+## Configuração
+
+A API utiliza **variável de ambiente** para autenticação.
+
+Crie um arquivo `.env` na raiz do projeto com base no `.env_example`.
+
+O arquivo `.env` não é versionado e já está incluído no `.gitignore`.
+
+O valor de `PREDICTION_API_TOKEN` deve ser um token secreto gerado previamente e
+configurado também no backend Java, sendo enviado no header `Authorization` das requisições.
+
 ## Inicialização
 
 Para inicializar o servidor, execute o comando abaixo:
 
 ```bash
-uvicorn main:app --reload
+uvicorn API.main:app --reload
 ```
 
 ## Requisição
@@ -34,6 +52,7 @@ uvicorn main:app --reload
 
 ```http
 Content-Type: application/json
+Authorization: Bearer <TOKEN>
 ```
 
 **Exemplo de corpo da requisição:**
@@ -43,7 +62,7 @@ Content-Type: application/json
   "origem": "GIG",
   "destino": "GRU",
   "data_partida": "2025-11-10T14:30:00",
-  "distancia_km": 350
+  "distancia_m": 350
 }
 ```
 
@@ -77,6 +96,11 @@ Content-Type: application/json
 import requests
 
 url = "http://127.0.0.1:8000/predict"
+
+headers = {
+    "Authorization": "Bearer SEU_TOKEN_AQUI"
+}
+
 data = {
     "companhia": "AZ",
     "origem": "GIG",
@@ -107,3 +131,5 @@ print(response.json())
 - A API **valida automaticamente o corpo da requisição** usando Pydantic.  
 - `data_partida` deve estar no **formato ISO 8601**: `YYYY-MM-DDTHH:MM:SS`.  
 - `probabilidade` está sempre entre **0 e 1**.  
+- Todas as requisições devem conter o header `Authorization`.
+- O token é configurado via variável de ambiente no servidor.

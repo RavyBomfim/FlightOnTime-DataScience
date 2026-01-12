@@ -15,4 +15,7 @@ env/
 .ipynb_checkpoints
 
 # Ignore large CSVs
-data/*.csv
+data/*.
+
+# Ignore environment variables file
+.env
