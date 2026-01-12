@@ -60,7 +60,7 @@ def predict_delay(model_filename: str, input_data: dict) -> dict:
     proba = model.predict_proba(x)
 
     predictions = {
-        "previsao": "Pontual" if pred[0] == 0 else "Atraso",
+        "previsao": pred,
         "probabilidade": proba[0][1]
     }
 

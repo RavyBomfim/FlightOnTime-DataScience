@@ -11,7 +11,8 @@ Este endpoint permite **prever a pontualidade de voos** com base na companhia a�
 
 A API recebe uma requisição JSON e retorna uma resposta JSON contendo:
 
-- **previsao**: status previsto do voo (`Pontual` ou `Atraso`)  
+
+- **previsao**: status previsto do voo (0 ou 1) 
 - **probabilidade**: probabilidade da previsão  
 
 O endpoint foi desenvolvido usando **FastAPI** e **Pydantic**, garantindo validação automática do corpo da requisição e estrutura do retorno.
@@ -117,7 +118,7 @@ print(response.json())
 
 ```JSON
 {
-  "previsao": "Pontual",
+  "previsao": 1,
   "probabilidade": 0.22
 }
 ```

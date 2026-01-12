@@ -1,6 +1,7 @@
 import os
 import datetime
 from fastapi import FastAPI, Header, HTTPException
+import numpy as np
 from pydantic import BaseModel
 from API.predict import predict_delay
 from dotenv import load_dotenv
@@ -26,7 +27,7 @@ class PredictRequest(BaseModel):
     distancia_m: int
 
 class PredictResponse(BaseModel):
-    previsao: str
+    previsao: int
     probabilidade: float
 
 @app.post("/predict", response_model=PredictResponse)
@@ -38,7 +39,7 @@ def predict(data: PredictRequest, authorization: str = Header(None)):
     # Load your trained model and run inference
     result = predict_delay(model_name, dict(data))
     previsao = result["previsao"]
-    probabilidade = result["probabilidade"]
+    probabilidade = round(np.float64(result["probabilidade"]), 2)
 
     return PredictResponse(
         previsao=previsao,
