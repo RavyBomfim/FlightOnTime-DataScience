@@ -1,23 +1,21 @@
 import os
 import datetime
-from fastapi import FastAPI, Header, HTTPException
 import numpy as np
+from dotenv import load_dotenv
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from API.predict import predict_delay
-from dotenv import load_dotenv
+
+# Nome do modelo treinado a ser utilizado (sem extensão)
+model_name = "flight_delay_LGBMClassifier_20260113_194452"
 
 load_dotenv()
-
 app = FastAPI()
 
 # 🔐 Lê o token do ambiente (produção)
 API_TOKEN = os.getenv("PREDICTION_API_TOKEN")
-
 if not API_TOKEN:
     raise RuntimeError("PREDICTION_API_TOKEN não configurado!")
-
-# Nome do modelo treinado a ser utilizado (sem extensão)
-model_name = "flight_delay_XGBClassifier_20260108_173529"
 
 class PredictRequest(BaseModel):
     companhia: str
@@ -43,5 +41,5 @@ def predict(data: PredictRequest, authorization: str = Header(None)):
 
     return PredictResponse(
         previsao=previsao,
-        probabilidade=probabilidade
+        probabilidade=probabilidade # type: ignore
     )

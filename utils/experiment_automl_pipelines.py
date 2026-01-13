@@ -27,6 +27,8 @@ def run_experiments(
     y_train: pd.Series,
     time_budget: float = -1,
     cv: int|Literal["auto"] = "auto",
+    export_models: bool = True,
+    random_state: int = 7,
 ) -> dict[str, automlx._interface]: # type: ignore
     experimental_models = {}
 
@@ -35,7 +37,7 @@ def run_experiments(
         print(f"🚀 Running experiment: {name}")
         print(f"{'='*60}\n")
 
-        pipeline = automlx.Pipeline(**config) # type: ignore
+        pipeline = automlx.Pipeline(**config, random_state=random_state) # type: ignore
 
         estimator = pipeline.fit(
             X_train,
@@ -51,8 +53,9 @@ def run_experiments(
     print(f"🏁 All experiments completed!")
     print(f"{'='*60}\n")
 
-    print("=> Exporting experimental models...\n")
-    export_experimental_models(experimental_models)
+    if export_models:
+        print("=> Exporting experimental models...\n")
+        export_experimental_models(experimental_models)
 
     return experimental_models
 

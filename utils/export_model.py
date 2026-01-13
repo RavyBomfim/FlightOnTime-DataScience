@@ -3,7 +3,7 @@ import pickle
 import automlx
 from datetime import datetime
 
-def export_model(estimator: automlx._interface.classifier.AutoClassifier, filename: str, timestamp: bool = False) -> None: # type: ignore
+def export_model(estimator: automlx._interface.classifier.AutoClassifier, filename: str, timestamp: bool = False) -> str: # type: ignore
     '''
     Exporta um modelo treinado para um arquivo pickle.
 
@@ -16,6 +16,11 @@ def export_model(estimator: automlx._interface.classifier.AutoClassifier, filena
     timestamp : bool, opcional
         - Se True, adiciona ao nome do arquivo um sufixo com data e hora
         no formato YYYYMMDD_HHMMSS, garantindo unicidade e versionamento.
+    
+    Retorna
+    -------
+    str
+        - Nome do arquivo salvo (com extensão .pkl).
 
     Notas
     -----
@@ -43,3 +48,5 @@ def export_model(estimator: automlx._interface.classifier.AutoClassifier, filena
 
     print(f"📁 Arquivo salvo com sucesso:")
     print(f"   → ./models/{filename}.pkl\n")
+
+    return f'{filename}.pkl'
