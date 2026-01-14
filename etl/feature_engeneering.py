@@ -1,41 +1,89 @@
 import pandas as pd
 import numpy as np
+
+def merge_aerodromos(df: pd.DataFrame, aerodromos: pd.DataFrame, tipo: str) -> pd.DataFrame:
+    """
+    Realiza o merge do DataFrame principal com a base de aeródromos,
+    adicionando latitude e longitude conforme o tipo informado.
+
+    Parâmetros
+    ----------
+    df : pandas.DataFrame
+        - DataFrame principal contendo o código do aeródromo.
+    tipo : str
+        - Define se o merge será feito para origem ou destino.
+
+    Retorna
+    -------
+    pandas.DataFrame
+        - DataFrame com as colunas de latitude e longitude incorporadas.
+    """
+    df = df.merge(
+        aerodromos,
+        left_on=f"Aeródromo {tipo.capitalize()}",
+        right_on="Código OACI", 
+        how='left'
+    ).rename(columns={"Latitude": f"lat_{tipo}", "Longitude": f"lon_{tipo}"}).drop(columns="Código OACI")
+
+    return df
+
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """
+    Calcula a distância em linha reta entre dois pontos geográficos
+    utilizando a fórmula de Haversine.
+
+    Parâmetros
+    ----------
+    lat1, lon1 : float
+        - Latitude e longitude do ponto de origem em graus.
+    lat2, lon2 : float
+        - Latitude e longitude do ponto de destino em graus.
+
+    Retorna
+    -------
+    float
+        - Distância aproximada entre os pontos, em metros.
+    """
+    R = 6371 # raio da terra em km
+
+    # Converte as latitudes e longitudes de graus para radianos
+    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
+
+    # Diferença entre as latitudes dos dois pontos
+    dlat = lat2 - lat1
+
+    # Diferença entre as longitudes dos dois pontos
+    dlon = lon2 - lon1
+
+    # Obtém o valor intermediário que representa a separação angular entre os dois pontos
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
+
+    # Obtém o ângulo central entre os dois pontos na superfície da Terra
+    c = 2 * np.arcsin(np.sqrt(a))
+
+    # Arrendonda o resultado do cáculo em km e converte para metros
+    distance = (round(R * c, 0) * 1000)
+
+    return distance
      
-def create_distance_col(df: pd.DataFrame, aerodromos: pd.DataFrame) -> pd.DataFrame:
-    def merge_aerodromos(df: pd.DataFrame, tipo: str) -> pd.DataFrame:
-        df = df.merge(
-            aerodromos,
-            left_on=f"Aeródromo {tipo.capitalize()}",
-            right_on="Código OACI", 
-            how='left'
-        ).rename(columns={"Latitude": f"lat_{tipo}", "Longitude": f"lon_{tipo}"}).drop(columns="Código OACI")
+def create_distance_col(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Insere as colunas de latitude e longitude para os aeróromos de origem e destino no DataFrame 
+    de voos por meio da função merge_aerodromos, calcula a distância entre os aeródromos 
+    de origem e destino utilizando a função haversine e, por fim, remove as colunas auxiliares 
+    de latitude e longitude.
 
-        return df
-    
-    # Função interna para calcular a distância entre dois aeroportos
-    def haversine(lat1, lon1, lat2, lon2):
-        R = 6371 # raio da terra em km
+    Parâmetros
+    ----------
+    df : pandas.DataFrame
+        - DataFrame contendo os dados de voos.
 
-        # Converte as latitudes e longitudes de graus para radianos
-        lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
-
-        # Diferença entre as latitudes dos dois pontos
-        dlat = lat2 - lat1
-
-        # Diferença entre as longitudes dos dois pontos
-        dlon = lon2 - lon1
-
-        # Obtém o valor intermediário que representa a separação angular entre os dois pontos
-        a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
-
-        # Obtém o ângulo central entre os dois pontos na superfície da Terra
-        c = 2 * np.arcsin(np.sqrt(a))
-
-        # Arrendonda o resultado do cáculo em km e converte para metros
-        distance = (round(R * c, 0) * 1000)
-
-        return distance
-    
+    Retorna
+    -------
+    pandas.DataFrame
+        - DataFrame com a coluna "Distância (m)" inserida e colunas
+        auxiliares removidas.
+    """
     df = merge_aerodromos(df, "origem")
     df = merge_aerodromos(df, "destino")
 
@@ -55,8 +103,22 @@ def create_distance_col(df: pd.DataFrame, aerodromos: pd.DataFrame) -> pd.DataFr
     return df
 
 def create_y_col(df: pd.DataFrame) -> pd.DataFrame:
-    # Cria a coluna "Atrasado" com valores 0 e 1
-    # 1 = Atrasado, 0 = No Horario
+    """
+    Cria a variável alvo de atraso com valores 1 = Atrasado e 0 = No horário, 
+    a partir dos horários de partida real e prevista e ajusta as colunas temporais
+    do DataFrame de voos.
+
+    Parâmetros
+    ----------
+    df : pandas.DataFrame
+        - DataFrame contendo os dados de voos com horários previstos e reais.
+
+    Retorna
+    -------
+    pandas.DataFrame
+        - DataFrame com a coluna "Atrasado" criada, a coluna de data e hora
+        renomeada e colunas auxiliares removidas.
+    """
     df["Atrasado"] = (df["Partida Real"] > df["Partida Prevista"]).astype('int8')
 
     # Renomeia a coluna "Partida Prevista" para "Data Hora Voo"
@@ -68,6 +130,25 @@ def create_y_col(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def clean_df(df: pd.DataFrame, aerodromos: pd.DataFrame, columns: list) -> pd.DataFrame:
+    """
+    Realiza a limpeza e filtragem do DataFrame de voos conforme critérios
+    específicos, incluindo a remoção de voos cancelados.
+
+    Parâmetros
+    ----------
+    df : pandas.DataFrame
+        - DataFrame contendo os dados brutos de voos.
+    aerodromos : pandas.DataFrame
+        - DataFrame com os aeródromos válidos, contendo o código OACI.
+    columns : list
+        - Lista de colunas a serem mantidas no DataFrame final.
+
+    Retorna
+    -------
+    pandas.DataFrame
+        - DataFrame de voos filtrado e contendo apenas as colunas
+        especificadas.
+    """
     # Remove voos cancelados
     df = df[df["Situação Voo"] == "REALIZADO"]
 

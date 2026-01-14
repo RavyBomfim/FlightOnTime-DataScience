@@ -8,6 +8,20 @@ from utils.evaluate_model import evaluate_model
 from utils.export_model import export_model
 
 def export_experimental_models(experimental_models: dict[str, automlx._interface]) -> None: # type: ignore
+    """
+    Exporta modelos experimentais treinados para o diretório
+    ./models/experimental_models.
+
+    Parâmetros
+    ----------
+    experimental_models : dict[str, automlx._interface]
+        - Dicionário contendo os modelos experimentais e seus respectivos
+        identificadores.
+
+    Retorna
+    -------
+    None
+    """
     # Garante que o diretório ./models/experimental_models exista
     experimental_models_dir = os.path.join(os.path.dirname(__file__), "..", "models", "experimental_models")
     experimental_models_dir = os.path.abspath(experimental_models_dir)
@@ -30,6 +44,32 @@ def run_experiments(
     export_models: bool = True,
     random_state: int = 7,
 ) -> dict[str, automlx._interface]: # type: ignore
+    """
+    Executa experimentos de treinamento de modelos a partir de diferentes
+    configurações de pipeline.
+
+    Parâmetros
+    ----------
+    pipeline_configs : Dict[str, dict]
+        - Dicionário contendo as configurações dos pipelines a serem testados.
+    X_train : pandas.DataFrame
+        - Dados de entrada utilizados no treinamento.
+    y_train : pandas.Series
+        - Variável alvo utilizada no treinamento.
+    time_budget : float, opcional
+        - Tempo máximo de execução de cada experimento.
+    cv : int ou "auto", opcional
+        - Estratégia de validação cruzada.
+    export_models : bool, opcional
+        - Define se os modelos experimentais serão exportados.
+    random_state : int, opcional
+        - Semente para reprodutibilidade dos experimentos.
+
+    Retorna
+    -------
+    dict[str, automlx._interface]
+        - Dicionário contendo os modelos treinados em cada experimento.
+    """
     experimental_models = {}
 
     for name, config in pipeline_configs.items():
@@ -64,6 +104,22 @@ def evaluate_experimental_models(
     X_test: pd.DataFrame,
     y_test: pd.Series,
 ) -> None:
+    """
+    Avalia modelos experimentais treinados utilizando um conjunto de teste.
+
+    Parâmetros
+    ----------
+    experimental_models : dict[str, automlx._interface]
+        - Dicionário contendo os modelos experimentais a serem avaliados.
+    X_test : pandas.DataFrame
+        - Dados de entrada utilizados na avaliação.
+    y_test : pandas.Series
+        - Variável alvo utilizada na avaliação.
+
+    Retorna
+    -------
+    None
+    """
     for name, estimator in experimental_models.items():
         print(f"\n{'='*60}")
         print(f"📊 Experiment results: {name}")
@@ -72,6 +128,20 @@ def evaluate_experimental_models(
         evaluate_model(estimator, X_test, y_test)
 
 def load_experimental_models(pipeline_configs: dict[str, dict]) -> dict[str, automlx._interface]: # type: ignore
+    """
+    Carrega modelos experimentais previamente salvos a partir das
+    configurações de pipeline informadas.
+
+    Parâmetros
+    ----------
+    pipeline_configs : dict[str, dict]
+        - Dicionário contendo os nomes dos pipelines esperados.
+
+    Retorna
+    -------
+    dict[str, automlx._interface]
+        - Dicionário com os modelos experimentais carregados com sucesso.
+    """
     print("Carregando modelos experimentais...\n")
 
     experimental_models_dir = os.path.join(

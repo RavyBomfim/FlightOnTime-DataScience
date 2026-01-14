@@ -30,8 +30,56 @@ def document_model(
     output_format: OutputFormat = '.md',
     timestamp: bool = False
 ) -> None:
+    """
+    Gera a documentação de um modelo treinado, incluindo especificações,
+    features esperadas e exemplos de entrada e saída.
+
+    Parâmetros
+    ----------
+    model : LogisticRegression ou RandomForestClassifier
+        - Modelo treinado a ser documentado.
+    model_name : str
+        - Nome identificador do modelo.
+    model_metadata : dict[str, Any]
+        - Metadados do modelo, incluindo tipo e parâmetros utilizados.
+    model_features : list[str]
+        - Lista de features esperadas pelo modelo.
+    x : pandas.DataFrame
+        - DataFrame de entrada utilizado como exemplo na documentação.
+    y : pandas.Series
+        - Série da variável alvo utilizada como exemplo de saída.
+    output_format : OutputFormat, opcional
+        - Formato do arquivo de saída (.md, .txt ou .html).
+    timestamp : bool, opcional
+        - Se True, adiciona um sufixo de data e hora ao nome do arquivo.
+
+    Retorna
+    -------
+    None
+
+    Exceções
+    --------
+    ValueError
+        - Lançada quando o formato de saída informado é inválido.
+    """
     # Helper functions to format dataframe and series documentation strings
     def format_model_input_summary(df: pd.DataFrame) -> str:
+        """
+        Gera um resumo textual do formato de entrada do modelo a partir de um
+        DataFrame, exibindo nomes das colunas, valores da primeira linha e
+        tipos de dados.
+
+        Parâmetros
+        ----------
+        df : pandas.DataFrame
+            - DataFrame utilizado como entrada do modelo.
+
+        Retorna
+        -------
+        str
+            - String formatada em estilo Markdown com o resumo das colunas do
+            DataFrame.
+        """
         first_row = df.iloc[0]
 
         # Determine column widths
@@ -75,6 +123,27 @@ def document_model(
         x_subset: pd.DataFrame,
         target_name: str = "y"
     ) -> str:
+        """
+        Gera um resumo textual das saídas do modelo, incluindo predições,
+        probabilidades e tipo da variável alvo.
+
+        Parâmetros
+        ----------
+        series : pandas.Series
+            - Série correspondente à variável alvo.
+        model : object
+            - Modelo treinado utilizado para gerar as predições.
+        x_subset : pandas.DataFrame
+            - Subconjunto de dados utilizado na inferência.
+        target_name : str, opcional
+            - Nome base da variável alvo para identificação das linhas.
+
+        Retorna
+        -------
+        str
+            - String formatada em estilo Markdown com o resumo das saídas do
+            modelo.
+        """
         # Predict values
         preds = model.predict(x_subset)
         probas = model.predict_proba(x_subset)

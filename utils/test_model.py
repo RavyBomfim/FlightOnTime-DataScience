@@ -2,7 +2,22 @@ import os
 import pickle
 import pandas as pd
 
-def test_model(model_filename: str, X_test: pd.DataFrame):
+def test_model(model_filename: str, X_test: pd.DataFrame) -> None:
+    """
+    Realiza testes de inferência em um modelo treinado utilizando um
+    subconjunto dos dados de teste.
+
+    Parâmetros
+    ----------
+    model_filename : str
+        - Nome do arquivo do modelo salvo.
+    X_test : pandas.DataFrame
+        - Conjunto de dados de teste utilizado na inferência.
+
+    Retorna
+    -------
+    None
+    """
     models_dir = os.path.join(os.path.dirname(__file__), "..", "models")
     models_dir = os.path.abspath(models_dir)
 

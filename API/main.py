@@ -30,7 +30,26 @@ class PredictResponse(BaseModel):
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(data: PredictRequest, authorization: str = Header(None)):
+    """
+    Endpoint da API responsável por realizar a predição de atraso de voo.
 
+    Parâmetros
+    ----------
+    data : PredictRequest
+        - Dados de entrada validados para a predição.
+    authorization : str, com valor padrão None
+        - Token de autenticação enviado no header da requisição.
+
+    Retorna
+    -------
+    PredictResponse
+        - Objeto contendo a previsão de atraso e a probabilidade associada.
+
+    Exceções
+    --------
+    HTTPException
+        - Retornada com status 401 quando o token de autenticação é inexistente ou inválido.
+    """
     if authorization != API_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 

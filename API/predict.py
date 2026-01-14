@@ -8,6 +8,27 @@ def validate_features(
     feature_mapping: dict,
     estimator: automlx._interface.classifier.AutoClassifier  # type: ignore
 ) -> None:
+    """
+    Valida a compatibilidade das features usadas na inferência com as
+    features esperadas pelo modelo treinado.
+
+    Parâmetros
+    ----------
+    feature_mapping : dict
+        - Mapeamento entre nomes de entrada e nomes de features do modelo.
+    estimator : automlx._interface.classifier.AutoClassifier
+        - Modelo treinado contendo a lista de features esperadas.
+
+    Retorna
+    -------
+    None
+
+    Exceções
+    --------
+    ValueError
+        - Lançada quando as features do mapeamento não coincidem com as
+        features esperadas pelo modelo.
+    """
     expected = set(estimator.selected_features_names_raw_)
     provided = set(feature_mapping.values())
 
@@ -22,6 +43,28 @@ def transform_input(
     input_data: dict,
     estimator: automlx._interface.classifier.AutoClassifier  # type: ignore
 ) -> pd.DataFrame:
+    """
+    Transforma os dados de entrada em um DataFrame compatível com o modelo
+    treinado para inferência.
+
+    Parâmetros
+    ----------
+    input_data : dict
+        - Dados brutos de entrada para predição.
+    estimator : automlx._interface.classifier.AutoClassifier
+        - Modelo treinado usado para validar as features esperadas.
+
+    Retorna
+    -------
+    pandas.DataFrame
+        - DataFrame formatado, tipado e com as colunas no padrão do modelo.
+
+    Exceções
+    --------
+    ValueError
+        - Lançada quando campos obrigatórios estão ausentes ou quando há
+        incompatibilidade entre as features do modelo e da entrada.
+    """
     FEATURE_MAPPING = {
         "companhia": "Empresa Aérea",
         "origem": "Aeródromo Origem",
@@ -49,6 +92,23 @@ def transform_input(
     return df
 
 def predict_delay(model_filename: str, input_data: dict) -> dict:
+    """
+    Realiza a predição de atraso de voo a partir de um modelo treinado e
+    dados de entrada fornecidos.
+
+    Parâmetros
+    ----------
+    model_filename : str
+        - Nome do arquivo do modelo (sem extensão .pkl).
+    input_data : dict
+        - Dados de entrada utilizados na inferência.
+
+    Retorna
+    -------
+    dict
+        - Dicionário contendo a previsão do modelo e a probabilidade
+        associada ao atraso.
+    """
     models_dir = os.path.join(os.path.dirname(__file__), "..", "models")
     models_dir = os.path.abspath(models_dir)
     model_path = f'{models_dir}/{model_filename}.pkl'
