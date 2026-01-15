@@ -66,7 +66,7 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
     return distance
      
-def create_distance_col(df: pd.DataFrame) -> pd.DataFrame:
+def create_distance_col(df: pd.DataFrame, aerodromos: pd.DataFrame) -> pd.DataFrame:
     """
     Insere as colunas de latitude e longitude para os aeróromos de origem e destino no DataFrame 
     de voos por meio da função merge_aerodromos, calcula a distância entre os aeródromos 
@@ -84,8 +84,8 @@ def create_distance_col(df: pd.DataFrame) -> pd.DataFrame:
         - DataFrame com a coluna "Distância (m)" inserida e colunas
         auxiliares removidas.
     """
-    df = merge_aerodromos(df, "origem")
-    df = merge_aerodromos(df, "destino")
+    df = merge_aerodromos(df, aerodromos, "origem")
+    df = merge_aerodromos(df, aerodromos, "destino")
 
     distances = haversine(
         df["lat_origem"],
