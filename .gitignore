@@ -19,3 +19,10 @@ data/*.
 
 # Ignore environment variables file
 .env
+
+# Ignore docker-related files
+Dockerfile
+.dockerignore
+README.Docker.md
+docker-compose.yml
+requirements-api.txt
