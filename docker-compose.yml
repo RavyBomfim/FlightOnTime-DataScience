@@ -1,0 +1,39 @@
+services:
+  flightontime-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flightontime-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PREDICTION_API_TOKEN=${PREDICTION_API_TOKEN}
+      # Uvicorn settings
+      - WORKERS=${WORKERS:-1}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    # Volumes removed for production - models are baked into image
+    # For development, uncomment volumes below:
+    # volumes:
+    #   - ./models:/app/models
+    #   - ./data:/app/data
+    #   - ./metadata:/app/metadata
+    #   - ./API:/app/API
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    # Security options
+    security_opt:
+      - no-new-privileges:true

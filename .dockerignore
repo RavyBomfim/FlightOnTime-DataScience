@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Data (comment out if needed in production)
+data/
+
+# Logs
+*.log
+
+# Environment variables (will be set at runtime)
+.env
+.env.*
+
+# Tests
+tests/
+test_*.py
+*_test.py
+
+# ETL and utility scripts (not needed for API)
+etl/
+# helpers/ - NEEDED by API for parsers
+utils/
+
+# Docker files
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Experimental models
+models/experimental_models/
+models/deprecated/

@@ -17,12 +17,8 @@ env/
 # Ignore large CSVs
 data/*.
 
-# Ignore environment variables file
+# Ignore environment variables file (keep only example files)
 .env
-
-# Ignore docker-related files
-Dockerfile
-.dockerignore
-README.Docker.md
-docker-compose.yml
-requirements-api.txt
+.env.local
+!.env.prod
+!.env_example
