@@ -20,5 +20,6 @@ data/*.
 # Ignore environment variables file (keep only example files)
 .env
 .env.local
-!.env.prod
+.env.prod
+!.env.prod.example
 !.env_example
